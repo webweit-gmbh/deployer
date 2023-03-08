@@ -14,6 +14,7 @@ use Deployer\Command\ConfigCommand;
 use Deployer\Command\InitCommand;
 use Deployer\Command\MainCommand;
 use Deployer\Command\RunCommand;
+use Deployer\Command\ScpCommand;
 use Deployer\Command\SshCommand;
 use Deployer\Command\TreeCommand;
 use Deployer\Command\WorkerCommand;
@@ -212,6 +213,7 @@ class Deployer extends Container
         $this->getConsole()->add(new InitCommand());
         $this->getConsole()->add(new TreeCommand($this));
         $this->getConsole()->add(new SshCommand($this));
+        $this->getConsole()->add(new ScpCommand($this));
         $this->getConsole()->add(new RunCommand($this));
         if (self::isPharArchive()) {
             $selfUpdate = new PharUpdateCommand('self-update');

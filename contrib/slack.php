@@ -74,7 +74,7 @@ set('slack_title', function () {
 });
 
 // Deploy message
-set('slack_text', '_{{user}}_ deploying `{{target}}` to *{{hostname}}*');
+set('slack_text', '*{{user}}* deploying *{{alias}}* last commit: ```{{commit-message}}``` by *{{lastCommitAuthor}}*');
 set('slack_success_text', 'Deploy to *{{target}}* successful');
 set('slack_failure_text', 'Deploy to *{{target}}* failed');
 set('slack_rollback_text', '_{{user}}_ rolled back changes on *{{target}}*');
@@ -175,3 +175,7 @@ task('slack:notify:rollback', function () {
 })
     ->once()
     ->hidden();
+
+before('deploy', 'slack:notify');
+after('deploy:failed', 'slack:notify:failure');
+after('deploy:success', 'slack:notify:success');

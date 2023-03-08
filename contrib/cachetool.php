@@ -97,3 +97,5 @@ desc('Clears file status and realpath caches');
 task('cachetool:clear:stat', function () {
     run("cd {{release_or_current_path}} && {{bin/php}} {{bin/cachetool}} stat:clear {{cachetool_options}}");
 });
+
+after('deploy:symlink', 'cachetool:clear:opcache');

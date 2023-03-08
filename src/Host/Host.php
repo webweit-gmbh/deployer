@@ -265,15 +265,15 @@ class Host
         return $this->get('hostname');
     }
 
-    public function connectionOptionsString(): string
+    public function connectionOptionsString(bool $isScp = false): string
     {
-        return implode(' ', array_map('escapeshellarg', $this->connectionOptionsArray()));
+        return implode(' ', array_map('escapeshellarg', $this->connectionOptionsArray($isScp)));
     }
 
     /**
      * @return string[]
      */
-    public function connectionOptionsArray(): array
+    public function connectionOptionsArray(bool $isScp = false): array
     {
         $options = [];
         if ($this->has('ssh_arguments')) {
@@ -282,7 +282,11 @@ class Host
             }
         }
         if ($this->has('port')) {
-            $options = array_merge($options, ['-p', $this->getPort()]);
+            if ($isScp) {
+                $options = array_merge($options, ['-P', $this->getPort()]);
+            } else {
+                $options = array_merge($options, ['-p', $this->getPort()]);
+            }
         }
         if ($this->has('config_file')) {
             $options = array_merge($options, ['-F', parse_home_dir($this->getConfigFile())]);

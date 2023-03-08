@@ -34,6 +34,7 @@ set('shared_files', [
 // These directories are shared among all releases.
 set('shared_dirs', [
     'config/jwt',
+    'config/packages',
     'files',
     'var/log',
     'public/media',
@@ -151,27 +152,23 @@ task('deploy', [
     'deploy:publish',
 ]);
 
-
-task('sw-build-without-db:get-remote-config', static function () {
-    if (!test('[ -d {{current_path}} ]')) {
-        return;
-    }
-    within('{{deploy_path}}/current', function () {
-        run('{{bin/php}} ./bin/console bundle:dump');
-        download('{{deploy_path}}/current/var/plugins.json', './var/');
-
-        run('{{bin/php}} ./bin/console theme:dump');
-        download('{{deploy_path}}/current/files/theme-config', './files/');
-    });
-});
-
 task('sw-build-without-db:build', static function () {
     runLocally('CI=1 SHOPWARE_SKIP_BUNDLE_DUMP=1 ./bin/build-js.sh');
 });
 
 task('sw-build-without-db', [
-    'sw-build-without-db:get-remote-config',
     'sw-build-without-db:build',
 ]);
 
+task('deploy:update_code', static function () {
+    runLocally('mv ./config/packages/storefront.yaml ./config/packages/storefront.yaml.dist');
+    upload('.', '{{release_path}}', ['flags' => '-az', 'options' => ['--exclude=**/node_modules']]);
+});
+
+task('sw-configure-local-file-use', static function () {
+    runLocally('composer config bearer.packages.shopware.com "{{ghToken}}"');
+    runLocally('mv ./config/packages/storefront.yaml.dist ./config/packages/storefront.yaml');
+});
+
+before('sw-build-without-db:build', 'sw-configure-local-file-use');
 before('deploy:update_code', 'sw-build-without-db');
